@@ -1,8 +1,9 @@
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, CallbackContext
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup # type: ignore
+from telegram.ext import Updater, CommandHandler, CallbackContext # type: ignore
 import os
 
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = os.getenv("TOKEN")
+
 
 def start(update: Update, context: CallbackContext):
     keyboard = [
