@@ -1,8 +1,10 @@
 services:
   - type: web
-    name: crackaid-bot
+    name: crackaid-bot-1
     env: python
+    plan: free
     buildCommand: ""
-    startCommand: python bot.py
-    repo: https://github.com/yourusername/your-repo-name
-    branch: main
+    startCommand: python3 bot.py
+    envVars:
+      - key: TOKEN
+        sync: false
