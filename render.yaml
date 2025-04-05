@@ -1,10 +1,10 @@
 services:
   - type: web
-    name: crackaid-bot-1
+    name: crackaid-bot
     env: python
     plan: free
     buildCommand: ""
-    startCommand: python3 bot.py
+    startCommand: python bot.py
     envVars:
       - key: TOKEN
-        sync: false
+        value: 7805668215:AAGmEvmdBcDHfajno84eIaQhF-fadoWfW7A

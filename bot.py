@@ -1,9 +1,11 @@
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup  # type: ignore
+from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler  # type: ignore
 import os
 
-TOKEN = os.getenv("TOKEN")  # Use environment variable from Render
-WEBHOOK_URL = "https://crackaid-bot-1.onrender.com"  # Replace with your Render app URL
+# ✅ Set your TOKEN and WEBHOOK URL
+TOKEN = os.getenv("TOKEN")  # This gets your token from environment variable in Render
+WEBHOOK_URL = "https://crackaid-bot-1.onrender.com"  # Your Render bot URL
+
 
 # In-memory storage for user quiz state
 user_data = {}
@@ -156,3 +158,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
