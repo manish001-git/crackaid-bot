@@ -2,13 +2,29 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler
 import os
 
-TOKEN = os.getenv("TOKEN")  # Add your token in Render Environment
-WEBHOOK_URL = "https://crackaid-bot-1.onrender.com"  # ✅ your Render app URL
+TOKEN = os.getenv("TOKEN")  # Use environment variable from Render
+WEBHOOK_URL = "https://crackaid-bot-1.onrender.com"  # Replace with your Render app URL
 
-# === In-memory storage (for testing) ===
+# In-memory storage for user quiz state
 user_data = {}
 
-# === Start command ===
+# Sample Questions (You can expand this later)
+questions = [
+    {
+        "question": "What is 10% of 200?",
+        "options": ["A. 10", "B. 20", "C. 30", "D. 40"],
+        "answer": "B",
+        "explanation": "10% of 200 = (10/100)*200 = 20"
+    },
+    {
+        "question": "What is the formula for Profit?",
+        "options": ["A. SP - CP", "B. CP - SP", "C. CP + SP", "D. None"],
+        "answer": "A",
+        "explanation": "Profit = Selling Price - Cost Price"
+    },
+]
+
+# === Start Command ===
 def start(update: Update, context: CallbackContext):
     keyboard = [
         [InlineKeyboardButton("SSC", callback_data='ssc')],
@@ -19,14 +35,16 @@ def start(update: Update, context: CallbackContext):
     reply_markup = InlineKeyboardMarkup(keyboard)
     update.message.reply_text("🎯 Choose a category:", reply_markup=reply_markup)
 
-# === Main category handler ===
+# === Main Button Handler ===
 def button(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
-
     user_id = query.from_user.id
-    user_data.setdefault(user_id, {"score": 0, "attempted": 0, "last_question": None})
 
+    # Initialize user data if not exists
+    user_data.setdefault(user_id, {"score": 0, "attempted": 0, "last_question": 0})
+
+    # Category buttons
     if query.data == 'ssc':
         keyboard = [
             [InlineKeyboardButton("Maths", callback_data='ssc_maths')],
@@ -71,40 +89,23 @@ def button(update: Update, context: CallbackContext):
         ask_question(query, user_id)
 
     elif query.data == 'back':
+        score_info = user_data[user_id]
+        text = f"🏁 Quiz Summary:\nAttempted: {score_info['attempted']}\nCorrect: {score_info['score']}"
         keyboard = [
             [InlineKeyboardButton("SSC", callback_data='ssc')],
             [InlineKeyboardButton("Railway", callback_data='railway')],
             [InlineKeyboardButton("Banking", callback_data='banking')],
         ]
-        score_info = user_data[user_id]
-        text = f"🏁 Quiz Summary:\nAttempted: {score_info['attempted']}\nCorrect: {score_info['score']}"
         query.edit_message_text(text=text, reply_markup=InlineKeyboardMarkup(keyboard))
 
-# === Sample questions ===
-questions = [
-    {
-        "question": "What is 10% of 200?",
-        "options": ["A. 10", "B. 20", "C. 30", "D. 40"],
-        "answer": "B",
-        "explanation": "10% of 200 = (10/100)*200 = 20"
-    },
-    {
-        "question": "What is the formula for Profit?",
-        "options": ["A. SP - CP", "B. CP - SP", "C. CP + SP", "D. None"],
-        "answer": "A",
-        "explanation": "Profit = Selling Price - Cost Price"
-    },
-]
-
-# === Ask a question ===
+# === Ask a Question ===
 def ask_question(query, user_id):
-    index = user_data[user_id].get("last_question", 0)
+    index = user_data[user_id]["last_question"]
     if index >= len(questions):
         query.edit_message_text("🎉 No more questions!")
         return
 
     q = questions[index]
-    user_data[user_id]["last_question"] = index
     keyboard = [
         [InlineKeyboardButton(q["options"][0], callback_data='A')],
         [InlineKeyboardButton(q["options"][1], callback_data='B')],
@@ -113,7 +114,7 @@ def ask_question(query, user_id):
     ]
     query.edit_message_text(f"❓ {q['question']}", reply_markup=InlineKeyboardMarkup(keyboard))
 
-# === Handle answer ===
+# === Handle Answer ===
 def handle_answer(query, user_id, selected):
     index = user_data[user_id]["last_question"]
     q = questions[index]
@@ -123,7 +124,7 @@ def handle_answer(query, user_id, selected):
         user_data[user_id]["score"] += 1
         result = "✅ Correct!"
     else:
-        result = f"❌ Wrong! Correct answer is: {q['answer']}"
+        result = f"❌ Wrong! Correct answer: {q['answer']}"
 
     explanation = f"{result}\n\n💡 Explanation: {q['explanation']}"
 
@@ -131,25 +132,27 @@ def handle_answer(query, user_id, selected):
         [InlineKeyboardButton("Next", callback_data='next')],
         [InlineKeyboardButton("🔙 Back to Categories", callback_data='back')],
     ]
+
     user_data[user_id]["last_question"] += 1
     query.edit_message_text(explanation, reply_markup=InlineKeyboardMarkup(keyboard))
 
-# === Main ===
+# === Main Entry ===
 def main():
     updater = Updater(TOKEN, use_context=True)
     dp = updater.dispatcher
+
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CallbackQueryHandler(button))
 
-    # For Render Deployment (Webhook)
+    PORT = int(os.environ.get("PORT", 8443))
     updater.start_webhook(
         listen="0.0.0.0",
-        port=int(os.environ.get('PORT', 8443)),
-        url_path=TOKEN,
-        webhook_url=f"{WEBHOOK_URL}/{TOKEN}"
+        port=PORT,
+        url_path="webhook",
+        webhook_url=f"{WEBHOOK_URL}/webhook"
     )
 
     updater.idle()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
