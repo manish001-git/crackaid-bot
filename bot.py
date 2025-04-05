@@ -3,8 +3,8 @@ from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQuery
 import os
 
 # ✅ Set your TOKEN and WEBHOOK URL
-TOKEN = os.getenv("TOKEN")  # This gets your token from environment variable in Render
 WEBHOOK_URL = "https://crackaid-bot-1.onrender.com"  # Your Render bot URL
+TOKEN = os.getenv("TOKEN")  # This gets your token from environment variable in Render
 
 
 # In-memory storage for user quiz state
