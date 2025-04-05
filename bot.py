@@ -1,11 +1,10 @@
+import os
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup  # type: ignore
 from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler  # type: ignore
-import os
 
 # ✅ Set your TOKEN and WEBHOOK URL
 WEBHOOK_URL = "https://crackaid-bot-1.onrender.com"  # Your Render bot URL
 TOKEN = os.getenv("TOKEN")  # This gets your token from environment variable in Render
-
 
 # In-memory storage for user quiz state
 user_data = {}
@@ -28,6 +27,7 @@ questions = [
 
 # === Start Command ===
 def start(update: Update, context: CallbackContext):
+    update.message.reply_text("Welcome to CrackAid Bot! 👋")
     keyboard = [
         [InlineKeyboardButton("SSC", callback_data='ssc')],
         [InlineKeyboardButton("Railway", callback_data='railway')],
@@ -42,11 +42,8 @@ def button(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
     user_id = query.from_user.id
-
-    # Initialize user data if not exists
     user_data.setdefault(user_id, {"score": 0, "attempted": 0, "last_question": 0})
 
-    # Category buttons
     if query.data == 'ssc':
         keyboard = [
             [InlineKeyboardButton("Maths", callback_data='ssc_maths')],
@@ -148,15 +145,13 @@ def main():
 
     PORT = int(os.environ.get("PORT", 8443))
     updater.start_webhook(
-    listen="0.0.0.0",
-    port=PORT,
-    url_path=TOKEN,
-    webhook_url=f"{WEBHOOK_URL}/{TOKEN}"
-)
-
+        listen="0.0.0.0",
+        port=PORT,
+        url_path=TOKEN,
+        webhook_url=f"{WEBHOOK_URL}/{TOKEN}"
+    )
 
     updater.idle()
 
 if __name__ == "__main__":
     main()
-    
