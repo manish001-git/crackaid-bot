@@ -2,20 +2,18 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup  # type:
 from telegram.ext import Updater, CommandHandler, CallbackContext, CallbackQueryHandler  # type: ignore
 import os
 
-# ✅ Read TOKEN securely from environment variables (set this in Render dashboard)
-TOKEN = os.getenv("TOKEN")
+TOKEN = os.getenv("TOKEN")  # Set your token in Render as an Environment Variable
 
-# ✅ Start function – first menu with exam categories
 def start(update: Update, context: CallbackContext):
     keyboard = [
         [InlineKeyboardButton("SSC", callback_data='ssc')],
         [InlineKeyboardButton("Railway", callback_data='railway')],
         [InlineKeyboardButton("Banking", callback_data='banking')],
+        [InlineKeyboardButton("Contact Us", callback_data='contact')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text("Choose your exam category:", reply_markup=reply_markup)
+    update.message.reply_text("Choose a category:", reply_markup=reply_markup)
 
-# ✅ Button handler for categories and subjects
 def button(update: Update, context: CallbackContext):
     query = update.callback_query
     query.answer()
@@ -46,10 +44,17 @@ def button(update: Update, context: CallbackContext):
         ]
         query.edit_message_text("Banking Subjects:", reply_markup=InlineKeyboardMarkup(keyboard))
 
+    elif query.data == 'contact':
+        keyboard = [
+            [InlineKeyboardButton("Instagram", url='https://instagram.com/yourusername')],
+            [InlineKeyboardButton("Telegram", url='https://t.me/yourchannel')],
+            [InlineKeyboardButton("Visit Website", url='https://yourwebsite.com')],
+        ]
+        query.edit_message_text("Contact Info:", reply_markup=InlineKeyboardMarkup(keyboard))
+
     else:
         query.edit_message_text(text=f"You selected: {query.data}")
 
-# ✅ Main function
 def main():
     updater = Updater(TOKEN, use_context=True)
     dispatcher = updater.dispatcher
@@ -60,5 +65,5 @@ def main():
     updater.start_polling()
     updater.idle()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
